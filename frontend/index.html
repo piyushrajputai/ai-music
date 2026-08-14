@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>MelodyAI — Create Music With AI</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     NAVBAR
+===================================================== -->
+
+<header class="navbar">
+
+    <div class="logo">
+
+        <div class="logo-icon">
+            ♪
+        </div>
+
+        <span>
+            Melody<span>AI</span>
+        </span>
+
+    </div>
+
+
+    <nav>
+
+        <a
+            href="#"
+            class="active"
+        >
+            Create
+        </a>
+
+        <a href="#">
+            My Songs
+        </a>
+
+        <a href="#">
+            Explore
+        </a>
+
+    </nav>
+
+
+    <button class="profile-button">
+        Get Started
+    </button>
+
+</header>
+
+
+
+<!-- =====================================================
+     MAIN
+===================================================== -->
+
+<main>
+
+
+<section class="hero">
+
+
+    <div class="badge">
+
+        <span class="spark">
+            ✦
+        </span>
+
+        AI MUSIC GENERATOR
+
+    </div>
+
+
+    <h1>
+
+        Turn your ideas into
+        <span>music.</span>
+
+    </h1>
+
+
+    <p class="hero-description">
+
+        Describe the song you imagine.
+        Choose your sound and let AI create it.
+
+    </p>
+
+
+
+<!-- =====================================================
+     GENERATOR
+===================================================== -->
+
+<div class="generator-card">
+
+
+    <!-- PROMPT HEADER -->
+
+    <div class="prompt-header">
+
+        <div class="prompt-title">
+
+            <div class="prompt-icon">
+                ✦
+            </div>
+
+            <div>
+
+                <strong>
+                    Describe your song
+                </strong>
+
+                <small>
+                    Tell AI what you want to hear
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div class="ai-status">
+
+            <span></span>
+
+            AI Ready
+
+        </div>
+
+    </div>
+
+
+
+    <!-- PROMPT -->
+
+    <div class="prompt-area">
+
+        <textarea
+            id="prompt"
+            maxlength="1000"
+            placeholder="Describe anything you want...
+
+Example: A romantic Punjabi pop song about two people falling in love."
+        ></textarea>
+
+
+        <div class="prompt-bottom">
+
+            <div class="prompt-tools">
+
+                <button
+                    class="tool-button active"
+                    type="button"
+                >
+                    🎵 Song
+                </button>
+
+                <button
+                    class="tool-button"
+                    type="button"
+                >
+                    🎤 Vocals
+                </button>
+
+                <button
+                    class="tool-button"
+                    type="button"
+                >
+                    🎹 Instrumental
+                </button>
+
+            </div>
+
+
+            <span
+                id="characterCount"
+                class="character-count"
+            >
+                0 / 1000
+            </span>
+
+        </div>
+
+    </div>
+
+
+
+<!-- =====================================================
+     AI OPTIONS
+===================================================== -->
+
+<div class="music-options">
+
+
+    <!-- GENRE -->
+
+    <div class="option">
+
+        <label>
+            Genre
+        </label>
+
+        <select id="genre">
+
+            <option value="Pop">
+                Pop
+            </option>
+
+            <option value="Punjabi Pop">
+                Punjabi Pop
+            </option>
+
+            <option value="Bollywood">
+                Bollywood
+            </option>
+
+            <option value="Hip-Hop">
+                Hip-Hop
+            </option>
+
+            <option value="EDM">
+                EDM
+            </option>
+
+            <option value="Lo-fi">
+                Lo-fi
+            </option>
+
+            <option value="Rock">
+                Rock
+            </option>
+
+            <option value="Classical">
+                Classical
+            </option>
+
+            <option value="R&B">
+                R&B
+            </option>
+
+            <option value="Jazz">
+                Jazz
+            </option>
+
+        </select>
+
+    </div>
+
+
+
+    <!-- LANGUAGE -->
+
+    <div class="option">
+
+        <label>
+            Language
+        </label>
+
+        <select id="language">
+
+            <option value="English">
+                English
+            </option>
+
+            <option value="Punjabi">
+                Punjabi
+            </option>
+
+            <option value="Hindi">
+                Hindi
+            </option>
+
+            <option value="Urdu">
+                Urdu
+            </option>
+
+            <option value="Bengali">
+                Bengali
+            </option>
+
+            <option value="Tamil">
+                Tamil
+            </option>
+
+            <option value="Telugu">
+                Telugu
+            </option>
+
+            <option value="Instrumental">
+                No Language
+            </option>
+
+        </select>
+
+    </div>
+
+
+
+    <!-- VOCALS -->
+
+    <div class="option">
+
+        <label>
+            Vocals
+        </label>
+
+        <select id="vocals">
+
+            <option value="Male vocals">
+                Male
+            </option>
+
+            <option value="Female vocals">
+                Female
+            </option>
+
+            <option value="No vocals">
+                No Vocals
+            </option>
+
+        </select>
+
+    </div>
+
+
+
+    <!-- MOOD -->
+
+    <div class="option">
+
+        <label>
+            Mood
+        </label>
+
+        <select id="mood">
+
+            <option value="Romantic">
+                Romantic
+            </option>
+
+            <option value="Happy">
+                Happy
+            </option>
+
+            <option value="Sad">
+                Sad
+            </option>
+
+            <option value="Energetic">
+                Energetic
+            </option>
+
+            <option value="Peaceful">
+                Peaceful
+            </option>
+
+            <option value="Dark">
+                Dark
+            </option>
+
+            <option value="Emotional">
+                Emotional
+            </option>
+
+            <option value="Epic">
+                Epic
+            </option>
+
+            <option value="Chill">
+                Chill
+            </option>
+
+        </select>
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     INSTRUMENTS
+===================================================== -->
+
+<div class="instrument-section">
+
+    <div class="instrument-heading">
+
+        <label>
+            Instruments
+        </label>
+
+        <span>
+            Choose up to 5
+        </span>
+
+    </div>
+
+
+    <div class="instrument-grid">
+
+
+        <button
+            class="instrument active"
+            data-instrument="Dhol"
+        >
+            🥁 Dhol
+        </button>
+
+
+        <button
+            class="instrument"
+            data-instrument="Tumbi"
+        >
+            🎸 Tumbi
+        </button>
+
+
+        <button
+            class="instrument"
+            data-instrument="Piano"
+        >
+            🎹 Piano
+        </button>
+
+
+        <button
+            class="instrument"
+            data-instrument="Guitar"
+        >
+            🎸 Guitar
+        </button>
+
+
+        <button
+            class="instrument"
+            data-instrument="Tabla"
+        >
+            🪘 Tabla
+        </button>
+
+
+        <button
+            class="instrument"
+            data-instrument="Flute"
+        >
+            🪈 Flute
+        </button>
+
+
+        <button
+            class="instrument"
+            data-instrument="Drums"
+        >
+            🥁 Drums
+        </button>
+
+
+        <button
+            class="instrument"
+            data-instrument="Synth"
+        >
+            🎛️ Synth
+        </button>
+
+
+        <button
+            class="instrument"
+            data-instrument="Violin"
+        >
+            🎻 Violin
+        </button>
+
+
+        <button
+            class="instrument"
+            data-instrument="Bass"
+        >
+            🎸 Bass
+        </button>
+
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     TYPE + DURATION
+===================================================== -->
+
+<div class="bottom-options">
+
+
+    <div class="type-section">
+
+        <label>
+            Music Type
+        </label>
+
+
+        <div class="type-buttons">
+
+            <button
+                class="type-button active"
+                data-type="Song"
+            >
+                🎵 Song
+            </button>
+
+
+            <button
+                class="type-button"
+                data-type="Instrumental"
+            >
+                🎹 Instrumental
+            </button>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="duration-section">
+
+        <div class="duration-heading">
+
+            <label>
+                Duration
+            </label>
+
+            <strong id="durationValue">
+                10 sec
+            </strong>
+
+        </div>
+
+
+        <input
+            type="range"
+            id="duration"
+            min="5"
+            max="30"
+            step="5"
+            value="10"
+        >
+
+
+        <div class="duration-labels">
+
+            <span>
+                5 sec
+            </span>
+
+            <span>
+                30 sec
+            </span>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     GENERATE
+===================================================== -->
+
+<button
+    id="generateButton"
+    class="generate-button"
+    type="button"
+>
+
+    <span class="generate-icon">
+        ✦
+    </span>
+
+    Generate Music
+
+    <span class="arrow">
+        →
+    </span>
+
+</button>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     EXAMPLES
+===================================================== -->
+
+<div class="examples">
+
+    <span class="examples-title">
+        Try an example
+    </span>
+
+
+    <button
+        class="example"
+        data-prompt="Create a romantic Punjabi song about two people falling in love."
+    >
+        🎵 Punjabi Romance
+    </button>
+
+
+    <button
+        class="example"
+        data-prompt="Create a peaceful Indian instrumental for meditation."
+    >
+        🪷 Meditation
+    </button>
+
+
+    <button
+        class="example"
+        data-prompt="Create a dark cinematic hip-hop beat with deep bass."
+    >
+        🌑 Dark Hip-Hop
+    </button>
+
+
+    <button
+        class="example"
+        data-prompt="Create an energetic electronic dance track with a huge festival drop."
+    >
+        ⚡ EDM
+    </button>
+
+</div>
+
+
+</section>
+
+
+
+<!-- =====================================================
+     OUTPUT
+===================================================== -->
+
+<section
+    id="outputSection"
+    class="output-section"
+>
+
+    <div class="output-empty">
+
+        <div class="empty-icon">
+            ♪
+        </div>
+
+        <h2>
+            Your music will appear here
+        </h2>
+
+        <p>
+            Describe your idea above and click
+            <strong>
+                Generate Music
+            </strong>.
+        </p>
+
+    </div>
+
+</section>
+
+
+</main>
+
+
+
+<!-- FOOTER -->
+
+<footer>
+
+    <div class="footer-logo">
+        MelodyAI
+    </div>
+
+    <p>
+        Create music with the power of artificial intelligence.
+    </p>
+
+    <span>
+        © 2026 MelodyAI
+    </span>
+
+</footer>
+
+
+
+<script src="script.js"></script>
+
+</body>
+
+</html>
