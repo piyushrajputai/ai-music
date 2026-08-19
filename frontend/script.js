@@ -1,4 +1,4 @@
-const API_URL = "https://min-appraisal-upcoming-len.trycloudflare.com";
+const API_URL = "https://constitutes-dependent-mpg-descriptions.trycloudflare.com";
 
 // =====================================================
 // ELEMENTS
