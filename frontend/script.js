@@ -1,391 +1,156 @@
-const API_URL = "http://localhost:5000";
-
+const API_URL = "http://127.0.0.1:5000";
 
 // =====================================================
 // ELEMENTS
 // =====================================================
 
-const promptBox =
-    document.getElementById("prompt");
+const promptBox = document.getElementById("prompt");
+const characterCount = document.getElementById("characterCount");
+const generateButton = document.getElementById("generateButton");
+const outputSection = document.getElementById("musicResult");
 
-const characterCount =
-    document.getElementById("characterCount");
-
-const generateButton =
-    document.getElementById("generateButton");
-
-const outputSection =
-    document.getElementById("outputSection");
-
-const genre =
-    document.getElementById("genre");
-
-const language =
-    document.getElementById("language");
-
-const vocals =
-    document.getElementById("vocals");
-
-const mood =
-    document.getElementById("mood");
-
-const duration =
-    document.getElementById("duration");
-
-const durationValue =
-    document.getElementById("durationValue");
-
-
-// =====================================================
-// CHARACTER COUNTER
-// =====================================================
-
-promptBox.addEventListener(
-    "input",
-    () => {
-
-        characterCount.textContent =
-            `${promptBox.value.length} / 1000`;
-
-    }
-);
+const genreSelect = document.getElementById("genre");
+const moodSelect = document.getElementById("mood");
+const durationSlider = document.getElementById("duration");
+const durationValue = document.getElementById("durationValue");
 
 
 // =====================================================
 // DURATION
 // =====================================================
 
-duration.addEventListener(
-    "input",
-    () => {
+if (durationSlider && durationValue) {
+
+    durationValue.textContent =
+        `${durationSlider.value} sec`;
+
+    durationSlider.addEventListener("input", () => {
 
         durationValue.textContent =
-            `${duration.value} sec`;
+            `${durationSlider.value} sec`;
 
-    }
-);
+    });
 
-
-// =====================================================
-// INSTRUMENTS
-// =====================================================
-
-const instrumentButtons =
-    document.querySelectorAll(
-        ".instrument"
-    );
-
-
-instrumentButtons.forEach(
-    button => {
-
-        button.addEventListener(
-            "click",
-            () => {
-
-                const selected =
-                    document.querySelectorAll(
-                        ".instrument.active"
-                    );
-
-
-                // Maximum 5
-
-                if (
-                    !button.classList.contains(
-                        "active"
-                    ) &&
-                    selected.length >= 5
-                ) {
-
-                    return;
-
-                }
-
-
-                button.classList.toggle(
-                    "active"
-                );
-
-            }
-        );
-
-    }
-);
+}
 
 
 // =====================================================
-// MUSIC TYPE
+// CHARACTER COUNT
 // =====================================================
 
-let musicType = "Song";
+if (promptBox && characterCount) {
 
+    promptBox.addEventListener("input", () => {
 
-const typeButtons =
-    document.querySelectorAll(
-        ".type-button"
-    );
+        characterCount.textContent =
+            `${promptBox.value.length} / 1000`;
 
+    });
 
-typeButtons.forEach(
-    button => {
-
-        button.addEventListener(
-            "click",
-            () => {
-
-                typeButtons.forEach(
-                    item => {
-
-                        item.classList.remove(
-                            "active"
-                        );
-
-                    }
-                );
-
-
-                button.classList.add(
-                    "active"
-                );
-
-
-                musicType =
-                    button.dataset.type;
-
-
-                // Automatically change vocal
-                // setting for instrumental
-
-                if (
-                    musicType ===
-                    "Instrumental"
-                ) {
-
-                    vocals.value =
-                        "No vocals";
-
-                    language.value =
-                        "Instrumental";
-
-                }
-
-            }
-        );
-
-    }
-);
+}
 
 
 // =====================================================
-// TOP TOOL BUTTONS
-// =====================================================
-
-const toolButtons =
-    document.querySelectorAll(
-        ".tool-button"
-    );
-
-
-toolButtons.forEach(
-    button => {
-
-        button.addEventListener(
-            "click",
-            () => {
-
-                toolButtons.forEach(
-                    item => {
-
-                        item.classList.remove(
-                            "active"
-                        );
-
-                    }
-                );
-
-
-                button.classList.add(
-                    "active"
-                );
-
-            }
-        );
-
-    }
-);
-
-
-// =====================================================
-// EXAMPLES
+// EXAMPLE PROMPTS
 // =====================================================
 
 const examples =
-    document.querySelectorAll(
-        ".example"
+    document.querySelectorAll(".example");
+
+examples.forEach(example => {
+
+    example.addEventListener("click", () => {
+
+        const prompt =
+            example.dataset.prompt;
+
+        promptBox.value = prompt;
+
+        if (characterCount) {
+
+            characterCount.textContent =
+                `${prompt.length} / 1000`;
+
+        }
+
+        promptBox.focus();
+
+    });
+
+});
+
+
+// =====================================================
+// GENERATE BUTTON
+// =====================================================
+
+if (generateButton) {
+
+    generateButton.addEventListener(
+        "click",
+        generateMusic
     );
 
-
-examples.forEach(
-    example => {
-
-        example.addEventListener(
-            "click",
-            () => {
-
-                const text =
-                    example.dataset.prompt;
-
-
-                promptBox.value =
-                    text;
-
-
-                characterCount.textContent =
-                    `${text.length} / 1000`;
-
-
-                promptBox.focus();
-
-            }
-        );
-
-    }
-);
+}
 
 
 // =====================================================
-// GENERATE
+// GENERATE MUSIC
 // =====================================================
-
-generateButton.addEventListener(
-    "click",
-    generateMusic
-);
-
 
 async function generateMusic() {
 
-
-    const userPrompt =
+    const prompt =
         promptBox.value.trim();
 
-
-    if (!userPrompt) {
-
-        alert(
-            "Please describe the music you want."
-        );
+    if (!prompt) {
 
         promptBox.focus();
+
+        alert(
+            "Describe the music you want first."
+        );
 
         return;
 
     }
 
 
-    // -------------------------------------------------
-    // GET SELECTED INSTRUMENTS
-    // -------------------------------------------------
+    // =================================================
+    // GET OPTIONS
+    // =================================================
 
-    const selectedInstruments =
-        Array.from(
-            document.querySelectorAll(
-                ".instrument.active"
-            )
-        ).map(
-            button =>
-                button.dataset.instrument
-        );
+    const genre =
+        genreSelect
+            ? genreSelect.value
+            : "";
 
+    const mood =
+        moodSelect
+            ? moodSelect.value
+            : "";
 
-    // -------------------------------------------------
-    // CREATE AI PROMPT
-    // -------------------------------------------------
-
-    let finalPrompt = "";
+    const duration =
+        durationSlider
+            ? Number(durationSlider.value)
+            : 10;
 
 
-    finalPrompt +=
-        `${userPrompt}. `;
-
-
-    finalPrompt +=
-        `Genre: ${genre.value}. `;
-
-
-    if (
-        language.value !==
-        "Instrumental"
-    ) {
-
-        finalPrompt +=
-            `Language: ${language.value}. `;
-
-    }
-
-
-    if (
-        vocals.value !==
-        "No vocals"
-    ) {
-
-        finalPrompt +=
-            `${vocals.value}. `;
-
-    } else {
-
-        finalPrompt +=
-            "Instrumental music with no vocals. ";
-
-    }
-
-
-    finalPrompt +=
-        `Mood: ${mood.value}. `;
-
-
-    if (
-        selectedInstruments.length > 0
-    ) {
-
-        finalPrompt +=
-            `Main instruments: ${selectedInstruments.join(", ")}. `;
-
-    }
-
-
-    finalPrompt +=
-        `Music type: ${musicType}. `;
-
-
-    finalPrompt +=
-        "High quality, polished music production.";
-
-
-    console.log(
-        "FINAL AI PROMPT:",
-        finalPrompt
-    );
-
-
-    // -------------------------------------------------
+    // =================================================
     // BUTTON
-    // -------------------------------------------------
+    // =================================================
 
-    generateButton.disabled =
-        true;
-
+    generateButton.disabled = true;
 
     generateButton.innerHTML = `
         <span>✦</span>
-        Creating your music...
+        Adding to queue...
     `;
 
 
-    // -------------------------------------------------
-    // OUTPUT
-    // -------------------------------------------------
+    // =================================================
+    // SHOW QUEUE
+    // =================================================
 
     outputSection.innerHTML = `
 
@@ -396,12 +161,17 @@ async function generateMusic() {
             </div>
 
             <h2>
-                AI is creating your music
+                Your music is in the queue
             </h2>
 
             <p>
-                Generating ${duration.value} seconds
-                of ${genre.value} music...
+                Your request has been sent to
+                Instruva.AI.
+            </p>
+
+            <p>
+                Your RTX 4060 will generate
+                your music shortly.
             </p>
 
         </div>
@@ -411,10 +181,9 @@ async function generateMusic() {
 
     try {
 
-
-        // -------------------------------------------------
-        // SEND TO BACKEND
-        // -------------------------------------------------
+        // =================================================
+        // SEND REQUEST
+        // =================================================
 
         const response =
             await fetch(
@@ -424,24 +193,21 @@ async function generateMusic() {
                     method: "POST",
 
                     headers: {
-
                         "Content-Type":
                             "application/json"
-
                     },
 
-                    body:
-                        JSON.stringify({
+                    body: JSON.stringify({
 
-                            prompt:
-                                finalPrompt,
+                        prompt: prompt,
 
-                            duration:
-                                Number(
-                                    duration.value
-                                )
+                        genre: genre,
 
-                        })
+                        mood: mood,
+
+                        duration: duration
+
+                    })
 
                 }
             );
@@ -451,98 +217,106 @@ async function generateMusic() {
             await response.json();
 
 
+        console.log(
+            "Backend response:",
+            data
+        );
+
+
         if (!response.ok) {
 
             throw new Error(
                 data.error ||
-                "Generation failed."
+                "Unable to create music."
             );
 
         }
 
 
-        // -------------------------------------------------
-        // RESULT
-        // -------------------------------------------------
+        // =================================================
+        // FIND JOB CODE
+        // =================================================
+
+        const jobCode =
+            data.job_code ||
+            data.job_id ||
+            data.id;
+
+
+        // =================================================
+        // IF AUDIO IS ALREADY AVAILABLE
+        // =================================================
+
+        if (data.audio_url) {
+
+            showMusicResult(
+                data.audio_url,
+                prompt
+            );
+
+            return;
+
+        }
+
+
+        // =================================================
+        // QUEUED JOB
+        // =================================================
+
+        if (!jobCode) {
+
+            throw new Error(
+                "The server accepted the request but did not return a job code."
+            );
+
+        }
+
+
+        // =================================================
+        // START STATUS CHECKING
+        // =================================================
 
         outputSection.innerHTML = `
 
-            <div class="generated-result">
+            <div class="output-empty">
 
-                <div class="result-top">
-
-                    <div class="result-cover">
-                        ♪
-                    </div>
-
-
-                    <div class="result-info">
-
-                        <span>
-                            AI GENERATED
-                        </span>
-
-                        <h2>
-                            Your ${genre.value} Music
-                        </h2>
-
-                        <p>
-                            ${escapeHTML(
-                                userPrompt
-                            )}
-                        </p>
-
-                    </div>
-
+                <div class="empty-icon">
+                    ✦
                 </div>
 
+                <h2>
+                    AI is creating your music
+                </h2>
 
-                <audio
-                    controls
-                    autoplay
-                    class="audio-player"
-                    src="${data.audio_url}"
-                ></audio>
+                <p>
+                    Job:
+                    <strong>
+                        ${escapeHTML(jobCode)}
+                    </strong>
+                </p>
 
-
-                <div class="result-actions">
-
-                    <a
-                        href="${data.audio_url}"
-                        download="melody-ai-music.wav"
-                        class="download-button"
-                    >
-                        ↓ Download
-                    </a>
-
-
-                    <button
-                        onclick="generateMusic()"
-                        class="again-button"
-                    >
-                        ↻ Generate Again
-                    </button>
-
-                </div>
+                <p>
+                    MusicGen is generating your
+                    ${duration}-second track on the RTX 4060.
+                </p>
 
             </div>
 
         `;
 
 
-        outputSection.scrollIntoView({
-
-            behavior: "smooth",
-
-            block: "center"
-
-        });
+        await checkMusicStatus(
+            jobCode,
+            prompt
+        );
 
 
     } catch (error) {
 
-
-        console.error(error);
+        console.error(
+            "Generation error:",
+            error
+        );
 
 
         outputSection.innerHTML = `
@@ -567,36 +341,347 @@ async function generateMusic() {
 
         `;
 
+    } finally {
+
+        generateButton.disabled = false;
+
+        generateButton.innerHTML = `
+
+            <span class="generate-icon">
+                ✦
+            </span>
+
+            Generate Music
+
+            <span class="arrow">
+                →
+            </span>
+
+        `;
+
     }
-
-
-    // -------------------------------------------------
-    // RESET BUTTON
-    // -------------------------------------------------
-
-    generateButton.disabled =
-        false;
-
-
-    generateButton.innerHTML = `
-
-        <span class="generate-icon">
-            ✦
-        </span>
-
-        Generate Music
-
-        <span class="arrow">
-            →
-        </span>
-
-    `;
 
 }
 
 
 // =====================================================
-// ESCAPE HTML
+// CHECK MUSIC STATUS
+// =====================================================
+
+async function checkMusicStatus(
+    jobCode,
+    prompt
+) {
+
+    let attempts = 0;
+
+    const maxAttempts = 240;
+
+
+    while (
+        attempts < maxAttempts
+    ) {
+
+        attempts++;
+
+
+        try {
+
+            const response =
+                await fetch(
+                    `${API_URL}/status/${encodeURIComponent(jobCode)}`
+                );
+
+
+            const data =
+                await response.json();
+
+
+            console.log(
+                "Music status:",
+                data
+            );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.error ||
+                    "Unable to check music status."
+                );
+
+            }
+
+
+            const job =
+                data.job ||
+                data;
+
+
+            // =================================================
+            // READY
+            // =================================================
+
+            if (
+                job.status === "ready" &&
+                job.audio_url
+            ) {
+
+                showMusicResult(
+                    job.audio_url,
+                    prompt
+                );
+
+                return;
+
+            }
+
+
+            // =================================================
+            // FAILED
+            // =================================================
+
+            if (
+                job.status === "failed"
+            ) {
+
+                throw new Error(
+                    job.error_message ||
+                    "Music generation failed."
+                );
+
+            }
+
+
+            // =================================================
+            // GENERATING
+            // =================================================
+
+            if (
+                job.status === "generating"
+            ) {
+
+                outputSection.innerHTML = `
+
+                    <div class="output-empty">
+
+                        <div class="empty-icon">
+                            ♪
+                        </div>
+
+                        <h2>
+                            Instruva is generating...
+                        </h2>
+
+                    
+                            
+                
+
+                        <p>
+                            Please keep this page open.
+                        </p>
+
+                    </div>
+
+                `;
+
+            }
+
+
+            // =================================================
+            // QUEUED
+            // =================================================
+
+            else if (
+                job.status === "queued"
+            ) {
+
+                outputSection.innerHTML = `
+
+                    <div class="output-empty">
+
+                        <div class="empty-icon">
+                            ✦
+                        </div>
+
+                        <h2>
+                            Your music is in the queue
+                        </h2>
+
+                        <p>
+                            Waiting for MusicGen...
+                        </p>
+
+                    </div>
+
+                `;
+
+            }
+
+
+        } catch (error) {
+
+            console.error(
+                "Status error:",
+                error
+            );
+
+            throw error;
+
+        }
+
+
+        // =================================================
+        // WAIT 5 SECONDS
+        // =================================================
+
+        await sleep(5000);
+
+    }
+
+
+    throw new Error(
+        "Music generation is taking longer than expected."
+    );
+
+}
+
+
+// =====================================================
+// SHOW MUSIC
+// =====================================================
+
+function showMusicResult(audioURL, prompt) {
+
+    audioURL = new URL(audioURL, API_URL).href;
+
+    console.log("FINAL AUDIO URL:", audioURL);
+
+    // rest of your function...
+
+
+    outputSection.innerHTML = `
+
+        <div class="generated-result">
+
+            <div class="result-top">
+
+                <div class="result-cover">
+                    ♪
+                </div>
+
+                <div class="result-info">
+
+                    <span>
+                        AI GENERATED
+                    </span>
+
+                    <h2>
+                        Your AI Music
+                    </h2>
+
+                    <p>
+                        ${escapeHTML(prompt)}
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <audio
+                controls
+                preload="auto"
+                class="audio-player"
+            >
+
+                <source
+                    src="${escapeHTML(audioURL)}"
+                    type="audio/wav"
+                >
+
+                Your browser does not support audio playback.
+
+            </audio>
+
+
+            <div class="result-actions">
+
+               <button
+    type="button"
+    class="download-button"
+    onclick="downloadMusic('${escapeHTML(audioURL)}')"
+>
+    ↓ Download
+</button>
+
+
+                <button
+                    onclick="generateMusic()"
+                    class="again-button"
+                >
+                    ↻ Generate Again
+                </button>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    const audioPlayer =
+        outputSection.querySelector(".audio-player");
+
+
+    if (audioPlayer) {
+
+        audioPlayer.load();
+
+        audioPlayer.addEventListener(
+            "error",
+            () => {
+
+                console.error(
+                    "Audio player error:",
+                    audioPlayer.error
+                );
+
+            }
+        );
+
+    }
+
+
+    outputSection.scrollIntoView({
+
+        behavior: "smooth",
+
+        block: "center"
+
+    });
+
+}
+
+// =====================================================
+// SLEEP
+// =====================================================
+
+function sleep(ms) {
+
+    return new Promise(
+        resolve =>
+            setTimeout(
+                resolve,
+                ms
+            )
+    );
+
+}
+
+
+// =====================================================
+// SECURITY
 // =====================================================
 
 function escapeHTML(text) {
@@ -605,8 +690,120 @@ function escapeHTML(text) {
         document.createElement("div");
 
     div.textContent =
-        text;
+        text ?? "";
 
     return div.innerHTML;
 
 }
+
+async function downloadMusic(audioURL) {
+
+    try {
+
+        const response = await fetch(audioURL);
+
+        if (!response.ok) {
+            throw new Error(
+                "Music file is not available."
+            );
+        }
+
+        const blob = await response.blob();
+
+        const blobURL =
+            window.URL.createObjectURL(blob);
+
+        const downloadLink =
+            document.createElement("a");
+
+        downloadLink.href = blobURL;
+
+        downloadLink.download =
+            "instruva-ai-music.wav";
+
+        document.body.appendChild(
+            downloadLink
+        );
+
+        downloadLink.click();
+
+        downloadLink.remove();
+
+        window.URL.revokeObjectURL(
+            blobURL
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Download error:",
+            error
+        );
+
+        alert(
+            "The music file could not be downloaded."
+        );
+
+    }
+
+}
+
+// =====================================================
+// INSTRUVA.AI BACKEND STATUS
+// =====================================================
+
+async function checkInstruvaStatus() {
+
+    const dot =
+        document.getElementById("instruvaStatusDot");
+
+    const text =
+        document.getElementById("instruvaStatusText");
+
+    if (!dot || !text) {
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_URL}/`,
+                {
+                    method: "GET",
+                    cache: "no-store"
+                }
+            );
+
+        if (!response.ok) {
+            throw new Error("Backend offline");
+        }
+
+        // Backend responded
+        dot.classList.remove("closed");
+        dot.classList.add("open");
+
+        text.textContent =
+            "Instruva.AI is Currently Open";
+
+    } catch (error) {
+
+        // Backend did not respond
+        dot.classList.remove("open");
+        dot.classList.add("closed");
+
+        text.textContent =
+            "Instruva.AI is Currently Closed";
+    }
+}
+
+
+// Check immediately
+checkInstruvaStatus();
+
+
+// Check every 10 seconds
+setInterval(
+    checkInstruvaStatus,
+    10000
+);
