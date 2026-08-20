@@ -1,4 +1,4 @@
-const API_URL = "https://mpg-livestock-waiting-tablet.trycloudflare.com ";
+const API_URL = "https://mpg-livestock-waiting-tablet.trycloudflare.com";
 
 // =====================================================
 // ELEMENTS
@@ -182,7 +182,7 @@ async function generateMusic() {
     try {
 
         // =================================================
-        // SEND REQUEST
+        // SEND REQUEST TO BACKEND
         // =================================================
 
         const response =
@@ -223,10 +223,15 @@ async function generateMusic() {
         );
 
 
+        // =================================================
+        // ERROR
+        // =================================================
+
         if (!response.ok) {
 
             throw new Error(
                 data.error ||
+                data.error_message ||
                 "Unable to create music."
             );
 
@@ -244,7 +249,7 @@ async function generateMusic() {
 
 
         // =================================================
-        // IF AUDIO IS ALREADY AVAILABLE
+        // AUDIO ALREADY AVAILABLE
         // =================================================
 
         if (data.audio_url) {
@@ -273,7 +278,7 @@ async function generateMusic() {
 
 
         // =================================================
-        // START STATUS CHECKING
+        // SHOW JOB
         // =================================================
 
         outputSection.innerHTML = `
@@ -304,6 +309,10 @@ async function generateMusic() {
 
         `;
 
+
+        // =================================================
+        // CHECK STATUS
+        // =================================================
 
         await checkMusicStatus(
             jobCode,
@@ -389,7 +398,11 @@ async function checkMusicStatus(
 
             const response =
                 await fetch(
-                    `${API_URL}/status/${encodeURIComponent(jobCode)}`
+                    `${API_URL}/status/${encodeURIComponent(jobCode)}`,
+                    {
+                        method: "GET",
+                        cache: "no-store"
+                    }
                 );
 
 
@@ -407,6 +420,7 @@ async function checkMusicStatus(
 
                 throw new Error(
                     data.error ||
+                    data.error_message ||
                     "Unable to check music status."
                 );
 
@@ -446,6 +460,7 @@ async function checkMusicStatus(
             ) {
 
                 throw new Error(
+                    job.error ||
                     job.error_message ||
                     "Music generation failed."
                 );
@@ -473,9 +488,10 @@ async function checkMusicStatus(
                             Instruva is generating...
                         </h2>
 
-                    
-                            
-                
+                        <p>
+                            MusicGen is creating your track
+                            on the RTX 4060.
+                        </p>
 
                         <p>
                             Please keep this page open.
@@ -548,16 +564,84 @@ async function checkMusicStatus(
 
 
 // =====================================================
+// CONVERT AUDIO URL TO BACKEND URL
+// =====================================================
+
+function getBackendAudioURL(audioURL) {
+
+    if (!audioURL) {
+        return "";
+    }
+
+    try {
+
+        // If backend already returned a complete URL,
+        // keep it.
+
+        if (
+            audioURL.startsWith("http://") ||
+            audioURL.startsWith("https://")
+        ) {
+
+            return audioURL;
+
+        }
+
+
+        // If backend returned /audio/file.wav,
+        // attach the backend tunnel URL.
+
+        return new URL(
+            audioURL,
+            `${API_URL}/`
+        ).href;
+
+    } catch (error) {
+
+        console.error(
+            "Invalid audio URL:",
+            audioURL,
+            error
+        );
+
+        return "";
+
+    }
+
+}
+
+
+// =====================================================
 // SHOW MUSIC
 // =====================================================
 
-function showMusicResult(audioURL, prompt) {
+function showMusicResult(
+    audioURL,
+    prompt
+) {
 
-    audioURL = new URL(audioURL, API_URL).href;
+    const finalAudioURL =
+        getBackendAudioURL(audioURL);
 
-    console.log("FINAL AUDIO URL:", audioURL);
 
-    // rest of your function...
+    console.log(
+        "Backend audio URL:",
+        audioURL
+    );
+
+    console.log(
+        "FINAL AUDIO URL:",
+        finalAudioURL
+    );
+
+
+    if (!finalAudioURL) {
+
+        throw new Error(
+            "The backend returned an invalid audio URL."
+        );
+
+    }
 
 
     outputSection.innerHTML = `
@@ -596,7 +680,7 @@ function showMusicResult(audioURL, prompt) {
             >
 
                 <source
-                    src="${escapeHTML(audioURL)}"
+                    src="${escapeHTML(finalAudioURL)}"
                     type="audio/wav"
                 >
 
@@ -607,13 +691,13 @@ function showMusicResult(audioURL, prompt) {
 
             <div class="result-actions">
 
-               <button
-    type="button"
-    class="download-button"
-    onclick="downloadMusic('${escapeHTML(audioURL)}')"
->
-    ↓ Download
-</button>
+                <button
+                    type="button"
+                    class="download-button"
+                    onclick="downloadMusic('${escapeHTML(finalAudioURL)}')"
+                >
+                    ↓ Download
+                </button>
 
 
                 <button
@@ -630,8 +714,14 @@ function showMusicResult(audioURL, prompt) {
     `;
 
 
+    // =================================================
+    // AUDIO PLAYER
+    // =================================================
+
     const audioPlayer =
-        outputSection.querySelector(".audio-player");
+        outputSection.querySelector(
+            ".audio-player"
+        );
 
 
     if (audioPlayer) {
@@ -653,6 +743,10 @@ function showMusicResult(audioURL, prompt) {
     }
 
 
+    // =================================================
+    // SCROLL TO RESULT
+    // =================================================
+
     outputSection.scrollIntoView({
 
         behavior: "smooth",
@@ -662,6 +756,7 @@ function showMusicResult(audioURL, prompt) {
     });
 
 }
+
 
 // =====================================================
 // SLEEP
@@ -696,42 +791,73 @@ function escapeHTML(text) {
 
 }
 
-async function downloadMusic(audioURL) {
+
+// =====================================================
+// DOWNLOAD MUSIC
+// =====================================================
+
+async function downloadMusic(
+    audioURL
+) {
 
     try {
 
-        const response = await fetch(audioURL);
+        const finalAudioURL =
+            getBackendAudioURL(audioURL);
+
+
+        const response =
+            await fetch(
+                finalAudioURL
+            );
+
 
         if (!response.ok) {
+
             throw new Error(
                 "Music file is not available."
             );
+
         }
 
-        const blob = await response.blob();
+
+        const blob =
+            await response.blob();
+
 
         const blobURL =
-            window.URL.createObjectURL(blob);
+            window.URL.createObjectURL(
+                blob
+            );
+
 
         const downloadLink =
             document.createElement("a");
 
-        downloadLink.href = blobURL;
+
+        downloadLink.href =
+            blobURL;
+
 
         downloadLink.download =
             "instruva-ai-music.wav";
+
 
         document.body.appendChild(
             downloadLink
         );
 
+
         downloadLink.click();
 
+
         downloadLink.remove();
+
 
         window.URL.revokeObjectURL(
             blobURL
         );
+
 
     } catch (error) {
 
@@ -739,6 +865,7 @@ async function downloadMusic(audioURL) {
             "Download error:",
             error
         );
+
 
         alert(
             "The music file could not be downloaded."
@@ -748,6 +875,7 @@ async function downloadMusic(audioURL) {
 
 }
 
+
 // =====================================================
 // INSTRUVA.AI BACKEND STATUS
 // =====================================================
@@ -755,14 +883,20 @@ async function downloadMusic(audioURL) {
 async function checkInstruvaStatus() {
 
     const dot =
-        document.getElementById("instruvaStatusDot");
+        document.getElementById(
+            "instruvaStatusDot"
+        );
 
     const text =
-        document.getElementById("instruvaStatusText");
+        document.getElementById(
+            "instruvaStatusText"
+        );
+
 
     if (!dot || !text) {
         return;
     }
+
 
     try {
 
@@ -775,34 +909,73 @@ async function checkInstruvaStatus() {
                 }
             );
 
+
         if (!response.ok) {
-            throw new Error("Backend offline");
+
+            throw new Error(
+                "Backend offline"
+            );
+
         }
 
-        // Backend responded
-        dot.classList.remove("closed");
-        dot.classList.add("open");
+
+        // =================================================
+        // BACKEND ONLINE
+        // =================================================
+
+        dot.classList.remove(
+            "closed"
+        );
+
+        dot.classList.add(
+            "open"
+        );
+
 
         text.textContent =
             "Instruva.AI is Currently Open";
 
+
     } catch (error) {
 
-        // Backend did not respond
-        dot.classList.remove("open");
-        dot.classList.add("closed");
+        console.error(
+            "Backend status error:",
+            error
+        );
+
+
+        // =================================================
+        // BACKEND OFFLINE
+        // =================================================
+
+        dot.classList.remove(
+            "open"
+        );
+
+        dot.classList.add(
+            "closed"
+        );
+
 
         text.textContent =
             "Instruva.AI is Currently Closed";
+
     }
+
 }
 
 
-// Check immediately
+// =====================================================
+// INITIAL BACKEND STATUS CHECK
+// =====================================================
+
 checkInstruvaStatus();
 
 
-// Check every 10 seconds
+// =====================================================
+// CHECK EVERY 10 SECONDS
+// =====================================================
+
 setInterval(
     checkInstruvaStatus,
     10000
